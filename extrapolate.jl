@@ -43,9 +43,9 @@ markline_idx = findfirst(x -> x > 73e6, vax_extrapolated)
 
 # Make background transparent for export
 if isinteractive()
-    bg_col = :white
+    bg_col = "#FFF"
 else
-    bg_col = :transparent
+    bg_col = "rgba(0,0,0,0)"
 end
 
 # plot the curve!
@@ -56,6 +56,8 @@ layout = Layout(
         title=attr(text="Date"), showgrid=true,
         zeroline=true),
     yaxis=attr(title=attr(text="Number of People with min. 1 Dose", standoff=10), zeroline=false, automargin=true),
+    paper_bgcolor=bg_col,
+    plot_bgcolor=bg_col
 );
 
 p_actual = scatter(
