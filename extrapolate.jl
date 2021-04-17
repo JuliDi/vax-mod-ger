@@ -66,6 +66,5 @@ plot!(
     color=:green
     )
 
-display(p)
 savefig("Plot_Vax.html")
 
