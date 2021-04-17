@@ -1,7 +1,7 @@
 using Plots, LsqFit, CSV, DataFrames, Dates, HTTP
 
 # Read CSV File
-#table = CSV.File("Impfungen.csv")
+# table = CSV.File("Impfungen.csv")
 table = CSV.File(HTTP.get("https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv").body)
 df = table |> DataFrame # Save to DataFrame
 
@@ -29,7 +29,7 @@ params_model = fit.param
 vax_extrapolated = model(dates_future_numeric, params_model)
 
 # find index where model predicts >80e6 vaccinations
-eightymio = findfirst(x -> x>80e6, model(dates_future_numeric, params_model))
+eightymio = findfirst(x -> x > 80e6, model(dates_future_numeric, params_model))
 
 # Use plotly
 plotlyjs()
@@ -40,22 +40,22 @@ p = plot(dates, vaccinations,
             legend=:outertopright,
             minorticks=true,
             minorgrid=true,
-            ticks = :native,
-            seriestype = :scatter,
+            ticks=:native,
+            seriestype=:scatter,
             markersize=2,
             linewidth=1,
             label="Actual Vaccinations",
-            xlabel="Date",
+            xlabel="Date (last update: " * string(Dates.format(now(), "Y-m-d, HH:MM") * ")"),
             ylabel="Number of People with min. 1 Dose",
             title="Vaccinations Model Germany",
-            #size=(1200,800)
+            # size=(1200,800)
 )
 plot!(
     dates_future,
     vax_extrapolated,
     linewidth=0.5,
     label="Model",
-    ticks = :native)
+    ticks=:native)
 
 
 # Plot horizontal and vertical line for >80 Mio
