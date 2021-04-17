@@ -1,8 +1,9 @@
 using Plots, LsqFit, CSV, DataFrames, Dates, HTTP
 
-# Read CSV File
-# table = CSV.File("Impfungen.csv")
+# Download CSV File
+println("Downloading new data...")
 table = CSV.File(HTTP.get("https://impfdashboard.de/static/data/germany_vaccinations_timeseries_v2.tsv").body)
+println("Done!")
 df = table |> DataFrame # Save to DataFrame
 
 # Extract dates and number of vaccinations
@@ -16,7 +17,7 @@ dates_future_numeric = 0:200
 # Create exponential model function
 # @. model(t, p) = p[1] * exp.(p[2] * t) .+ p[3]
 # @. model(t, p) = p[1] * exp(p[2] * t) * t * t
-@. model(t, p) = p[1] * t^3 + p[2]
+@. model(t, p) = p[1] * t^4 + p[2]
 
 # Think of some random start value, TODO: improve to use more realistic values
 p0 = [7.302e+05, 0.02773, 1000]
@@ -59,6 +60,7 @@ p = plot(dates, vaccinations,
             xlabel="Date (last update: " * string(Dates.format(now(), "Y-m-d, HH:MM") * ")"),
             ylabel="Number of People with min. 1 Dose",
             title="Vaccinations Model Germany",
+            options=Dict(:responsive => true)
             # size=(1200,800)
 )
 plot!(
