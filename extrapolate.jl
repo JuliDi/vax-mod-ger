@@ -12,7 +12,7 @@ dates_numeric = Dates.value.(dates - dates[1])
 vaccinations = df[!,"personen_erst_kumulativ"]
 
 # Construct including future dates
-dates_future_numeric = 0:220
+dates_future_numeric = 0:300
 dates_future = [dates[1] + Day(i) for i in dates_future_numeric]
 
 # Create exponential model function
@@ -65,7 +65,8 @@ layout = Layout(
         showgrid=true,
         zeroline=true,
         rangeslider=attr(
-            visible=true,
+            #visible=true,
+            visible=false,
             yaxis=attr(rangemode="auto"),
         ),
         range=[dates_future[1]-Day(10), dates_future[markline_idx]+Day(10)],
@@ -79,8 +80,7 @@ layout = Layout(
         rangemode="tozero",
         scaleanchor="y2",
         scaleratio=1/10,
-        autorange = true,
-        fixedrange=false
+        range=[0, maximum(vax_extrapolated[markline_idx]*1.1)]
     ),
     yaxis2=attr(
         title=attr(
@@ -92,17 +92,14 @@ layout = Layout(
         scaleratio=10,
         constraintoward="bottom",
         rangemode="tozero",
-        autorange = true,
-        fixedrange=false,
+
     ),
     paper_bgcolor=bg_col,
     plot_bgcolor=bg_col,
     legend=attr(
         orientation="h",
         x="0.5",
-        y=-0.4,
         xanchor="center",
-        yanchor="top",
     ),
 );
 
