@@ -65,11 +65,11 @@ layout = Layout(
         showgrid=true,
         zeroline=true,
         rangeslider=attr(
-            #visible=true,
+            # visible=true,
             visible=false,
             yaxis=attr(rangemode="auto"),
         ),
-        range=[dates_future[1]-Day(10), dates_future[markline_idx]+Day(10)],
+        range=[dates_future[1] - Day(10), dates_future[markline_idx] + Day(10)],
     ),
     yaxis=attr(
         title=attr(
@@ -79,8 +79,8 @@ layout = Layout(
         automargin=true,
         rangemode="tozero",
         scaleanchor="y2",
-        scaleratio=1/10,
-        range=[0, maximum(vax_extrapolated[markline_idx]*1.1)]
+        scaleratio=1 / 10,
+        range=[0, maximum(vax_extrapolated[markline_idx] * 1.1)]
     ),
     yaxis2=attr(
         title=attr(
@@ -101,6 +101,8 @@ layout = Layout(
         x="0.5",
         xanchor="center",
     ),
+    hovermode="x unified",
+    hoverlabel=attr(namelength=-1) 
 );
 
 p_actual = scatter(
@@ -108,7 +110,8 @@ p_actual = scatter(
     y=vaccinations,
     mode="markers",
     name="Actual Vaccinations (Cumulative)",
-    marker=attr(symbol="circle-open")
+    marker=attr(symbol="circle-open"),
+    marker_color="blue"
 )
 
 p_model = scatter(
@@ -116,15 +119,17 @@ p_model = scatter(
     y=vax_extrapolated,
     linewidth=0.5,
     name="Model (a*x + b*x² + c*x³ + d)",
+    marker_color="dodgerblue"
 )
 
 p_vpd = scatter(
-    x = dates,
-    y = df.dosen_erst_differenz_zum_vortag,
+    x=dates,
+    y=df.dosen_erst_differenz_zum_vortag,
     mode="markers",
     name="Actual Vaccinations per Day",
     marker=attr(symbol="diamond-open"),
-    yaxis="y2"
+    yaxis="y2",
+    marker_color="red"
 )
 
 p_model_vpd = scatter(
@@ -132,7 +137,8 @@ p_model_vpd = scatter(
     y=vax_per_day,
     linewidth=0.5,
     name="Vaccinations per Day (Model)",
-    yaxis="y2"
+    yaxis="y2",
+    marker_color="crimson"
 )
 
 # Plot horizontal and vertical line for >73 Mio
@@ -140,10 +146,14 @@ p_lines = scatter(
     x=vcat(dates_future[1:markline_idx], dates_future[markline_idx]),
     y=vcat(vax_extrapolated[markline_idx] * ones(markline_idx), 0),
     name=">73-Mio First-Dose",
-    color=:green
+    marker_color="green"
 )
 
-p = plot([p_actual, p_model, p_lines, p_vpd, p_model_vpd], layout, options=Dict(:responsive => true, :editable => true))
+p = plot(
+    [p_actual, p_model, p_vpd, p_model_vpd, p_lines],
+    layout,
+    options=Dict(:responsive => true),
+    )
 
 if isinteractive()
     display(p)
