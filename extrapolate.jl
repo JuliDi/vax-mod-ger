@@ -164,11 +164,12 @@ savehtml(p, "Plot_Vax.html", :remote)
 
 # Create model params file
 res_file = open("results.html", "w");
+println(res_file, "<p><b>>73 Mio First-Dose Vaccinations on ", dates_future[markline_idx], "</b></p>")
 println(res_file, "Model Parameters: <ul>")
 println(res_file, "<li>a = ", params_model[1], "</li>")
 println(res_file, "<li>b = ", params_model[2], "</li>")
 println(res_file, "<li>c = ", params_model[3], "</li>")
 println(res_file, "<li>d = ", params_model[4], "</li>")
 println(res_file, "</ul>")
-println(res_file, "<p>>73 Mio First-Dose Vaccinations on ", dates_future[markline_idx], "</p>")
+
 close(res_file)
