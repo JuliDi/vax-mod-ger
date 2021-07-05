@@ -1,4 +1,9 @@
+using Pkg
+Pkg.activate(".")
 using PlotlyJS, LsqFit, CSV, DataFrames, Dates, HTTP
+
+# Timeframe in days to use for fitting the curve
+timeframe = 60
 
 # Download CSV File
 println("Downloading new data...")
@@ -20,16 +25,16 @@ dates_future = [dates[1] + Day(i) for i in dates_future_numeric]
 # @. model(t, p) = p[1] * exp(p[2] * t) * t * t
 # @. model(t, p) = p[1] * (t)^3 + p[3]
 function model(t, p)
-    p[1] .* t .+ p[2] .* t.^2 .+ p[3] .* t.^3 .+ p[4];
+    p[1] .* t .+  p[2];
 end
 
 # Think of some random start value, TODO: improve to use more realistic values
 # p0 = [2.0, 2.0, 10000.0]
-p0 = [5e3, 2.0, 2.0, 10000.0]
-ub = [8e6, 8e6, 8e6, 1e10]
+p0 = [35e3, 2.0]
+ub = [8e6, 8e6]
 
 # Fit the model
-fit = curve_fit(model, dates_numeric, vaccinations, p0, upper=ub)
+fit = curve_fit(model, dates_numeric[end-timeframe:end], vaccinations[end-timeframe:end], p0, upper=ub)
 
 # Get the model parameters
 params_model = fit.param
@@ -39,7 +44,7 @@ vax_extrapolated = model(dates_future_numeric, params_model)
 
 # estimate vaccinations per day (1st derivative)
 vax_per_day =
-    params_model[1] .+ 2 .*  params_model[2] .* dates_future_numeric .+ 3 .* params_model[3] .* dates_future_numeric.^2;
+    params_model[1] .+ 0.0 .* dates_future_numeric;
 
 # find index where model predicts >80e6 vaccinations
 markline_idx = findfirst(x -> x > 73e6, vax_extrapolated)
@@ -58,7 +63,7 @@ end
 
 layout = Layout(
     title=attr(
-        text="Vaccinations Model Germany<br>(last update: " * string(Dates.format(now(), "Y-m-d, HH:MM") * ")"),
+        text="Expected >73 Mio First-Dose Vaccinations: " * string(dates_future[markline_idx])*"<br>(last update: " * string(Dates.format(now(), "Y-m-d, HH:MM") * ")"),
     ),
     xaxis=attr(
         title=attr(text="Date"),
@@ -69,7 +74,7 @@ layout = Layout(
             visible=false,
             yaxis=attr(rangemode="auto"),
         ),
-        range=[dates_future[1] - Day(10), dates_future[markline_idx] + Day(10)],
+        range=[dates[end-timeframe] - Day(10), dates_future[markline_idx] + Day(10)],
     ),
     yaxis=attr(
         title=attr(
@@ -118,7 +123,7 @@ p_model = scatter(
     x=dates_future,
     y=vax_extrapolated,
     linewidth=0.5,
-    name="Model (a*x + b*x² + c*x³ + d)",
+    name="Model (a*x + b)",
     marker_color="dodgerblue"
 )
 
@@ -168,8 +173,8 @@ println(res_file, "<p><b>>73 Mio First-Dose Vaccinations on ", dates_future[mark
 println(res_file, "Model Parameters: <ul>")
 println(res_file, "<li>a = ", params_model[1], "</li>")
 println(res_file, "<li>b = ", params_model[2], "</li>")
-println(res_file, "<li>c = ", params_model[3], "</li>")
-println(res_file, "<li>d = ", params_model[4], "</li>")
+#println(res_file, "<li>c = ", params_model[3], "</li>")
+#println(res_file, "<li>d = ", params_model[4], "</li>")
 println(res_file, "</ul>")
 
 close(res_file)
