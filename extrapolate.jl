@@ -17,8 +17,10 @@ dates_numeric = Dates.value.(dates - dates[1])
 vaccinations = df[!,"personen_erst_kumulativ"]
 
 # Construct including future dates
-dates_future_numeric = 0:300
-dates_future = [dates[1] + Day(i) for i in dates_future_numeric]
+dates_future = copy(dates)
+days_in_future = 1:90;
+append!(dates_future, [dates[end] + Day(i) for i in days_in_future])
+dates_future_numeric = Dates.value.(dates_future - dates_future[1])
 
 # Create exponential model function
 # @. model(t, p) = p[1] * exp.(p[2] * t) .+ p[3]
@@ -47,7 +49,7 @@ vax_per_day =
     params_model[1] .+ 0.0 .* dates_future_numeric;
 
 # find index where model predicts >80e6 vaccinations
-markline_idx = findfirst(x -> x > 73e6, vax_extrapolated)
+#markline_idx = findfirst(x -> x > 73e6, vax_extrapolated) # Vaccination rate too low at the moment, doesn't work (Sept 2021)
 
 # Use plotly
 # plotlyjs()
@@ -63,7 +65,7 @@ end
 
 layout = Layout(
     title=attr(
-        text="Expected >73 Mio First-Dose Vaccinations: " * string(dates_future[markline_idx])*"<br>(last update: " * string(Dates.format(now(), "Y-m-d, HH:MM") * ")"),
+        text="Vaccination Model Germany " *"<br>Last update: " * string(Dates.format(now(), "Y-m-d, HH:MM")),
     ),
     xaxis=attr(
         title=attr(text="Date"),
@@ -74,7 +76,7 @@ layout = Layout(
             visible=false,
             yaxis=attr(rangemode="auto"),
         ),
-        range=[dates[end-timeframe] - Day(10), dates_future[markline_idx] + Day(10)],
+        range=[dates[end-timeframe] - Day(10), dates_future[end] + Day(10)],
     ),
     yaxis=attr(
         title=attr(
@@ -85,7 +87,7 @@ layout = Layout(
         rangemode="tozero",
         scaleanchor="y2",
         scaleratio=1 / 10,
-        range=[0, maximum(vax_extrapolated[markline_idx] * 1.1)]
+        range=[0, maximum(vax_extrapolated * 1.1)]
     ),
     yaxis2=attr(
         title=attr(
@@ -147,15 +149,15 @@ p_model_vpd = scatter(
 )
 
 # Plot horizontal and vertical line for >73 Mio
-p_lines = scatter(
-    x=vcat(dates_future[1:markline_idx], dates_future[markline_idx]),
-    y=vcat(vax_extrapolated[markline_idx] * ones(markline_idx), 0),
-    name=">73-Mio First-Dose",
-    marker_color="green"
-)
+#p_lines = scatter(
+#    x=vcat(dates_future[1:markline_idx], dates_future[markline_idx]),
+#    y=vcat(vax_extrapolated[markline_idx] * ones(markline_idx), 0),
+#    name=">73-Mio First-Dose",
+#    marker_color="green"
+#)
 
 p = plot(
-    [p_actual, p_model, p_vpd, p_model_vpd, p_lines],
+    [p_actual, p_model, p_vpd, p_model_vpd],#, p_lines],
     layout,
     options=Dict(:responsive => true),
     )
@@ -169,7 +171,7 @@ savehtml(p, "Plot_Vax.html", :remote)
 
 # Create model params file
 res_file = open("results.html", "w");
-println(res_file, "<p><b>>73 Mio First-Dose Vaccinations on ", dates_future[markline_idx], "</b></p>")
+#println(res_file, "<p><b>>73 Mio First-Dose Vaccinations on ", dates_future[markline_idx], "</b></p>")
 println(res_file, "Model Parameters: <ul>")
 println(res_file, "<li>a = ", params_model[1], "</li>")
 println(res_file, "<li>b = ", params_model[2], "</li>")
