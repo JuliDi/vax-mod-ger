@@ -33,10 +33,9 @@ end
 # Think of some random start value, TODO: improve to use more realistic values
 # p0 = [2.0, 2.0, 10000.0]
 p0 = [35e3, 2.0]
-ub = [8e6, 8e6]
 
 # Fit the model
-fit = curve_fit(model, dates_numeric[end-timeframe:end], vaccinations[end-timeframe:end], p0, upper=ub)
+fit = curve_fit(model, dates_numeric[end-timeframe:end], vaccinations[end-timeframe:end], p0)
 
 # Get the model parameters
 params_model = fit.param
